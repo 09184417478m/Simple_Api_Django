@@ -1,12 +1,9 @@
-# core/sms_services.py
-
 from abc import ABC, abstractmethod
 import environ
 import os
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# Initializing environment variables
 env = environ.Env()
 env_file = os.path.join(BASE_DIR, '.env')
 environ.Env.read_env(env_file)

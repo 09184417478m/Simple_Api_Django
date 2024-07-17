@@ -1,14 +1,15 @@
-# core/views.py
-
+import token
+from datetime import datetime, timezone
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
-from .models import CustomUser
+from .models import CustomUser, TokenMetadata
 from .serializers import RegisterSerializer
 from .sms_services import SmsServiceFactory
 import random
@@ -26,17 +27,37 @@ class RegisterView(APIView):
             return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class LoginView(APIView):
     permission_classes = []
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(username=username, password=password)
-        if user:
-            refresh = RefreshToken.for_user(user)
-            return Response({'refresh': str(refresh), 'access': str(refresh.access_token)}, status=status.HTTP_200_OK)
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
+    def post(self, request, *args, **kwargs):
+        user = authenticate(request, username=request.data['username'], password=request.data['password'])
+
+        if user is not None:
+
+            token = RefreshToken.for_user(user)
+
+            access_token = token.access_token
+
+            existing_token = OutstandingToken.objects.get(
+                jti=token.payload['jti']
+            )
+
+            user_agent = request.META.get('HTTP_USER_AGENT', 'unknown')
+
+            token_metadata = TokenMetadata(
+                token=existing_token,
+                user_agent=user_agent,
+            )
+            token_metadata.save()
+
+            return Response({
+                'refresh': str(token),
+                'access': str(access_token),
+            })
+        else:
+            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 class LogoutView(APIView):
 
     def post(self, request):
@@ -130,12 +151,11 @@ class ForgotPasswordView(APIView):
         return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
 
 class ListTokensView(APIView):
-
-
     def get(self, request):
         user = request.user
         tokens = OutstandingToken.objects.filter(user=user)
-        token_list = [{"token_id": token.id, "user_agent": token.user_agent} for token in tokens]
+        token_metadata = TokenMetadata.objects.filter(token_id__in=tokens.values_list('id', flat=True))
+        token_list = [{"token_id": token.token_id, "user_agent": token.user_agent} for token in token_metadata]
         return Response(token_list, status=status.HTTP_200_OK)
 
 class KillTokensView(APIView):
