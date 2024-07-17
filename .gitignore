@@ -3,4 +3,4 @@ myenv/
 .idea/
 simple_api/__pycache__/
 core/__pycache__/
-core/migrations/__pycashe__
+core/migrations/__pycache__
