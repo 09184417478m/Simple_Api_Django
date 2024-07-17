@@ -1,4 +1,4 @@
 .env
-myenv/
-.idea/
-simple_api/__pycache__/
+myenv\
+.idea\
+simple_api\__pycache__\
