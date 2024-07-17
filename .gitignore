@@ -1,5 +1,5 @@
 .env
-myenv\
-.idea\
-simple_api\__pycache__\
-core\__pycache__\
+myenv/
+.idea/
+simple_api\__pycache__/
+core/__pycache__/
