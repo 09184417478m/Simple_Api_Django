@@ -19,6 +19,7 @@ class TokenMetadata(models.Model):
     updated_at = models.DateTimeField(auto_now=True , null=True)
 
     def __str__(self):
+        
         return f'TokenMetadata(token_id={self.token.id}, user_agent={self.user_agent})'
 
 

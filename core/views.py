@@ -15,11 +15,19 @@ from .sms_services import SmsServiceFactory
 import random
 from rest_framework.permissions import IsAuthenticated
 import logging
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample ,inline_serializer
+from rest_framework import serializers
 
 
 
 class RegisterView(APIView):
     permission_classes = []
+    
+    @extend_schema(
+        request=RegisterSerializer,
+        responses={201: dict(message="User registered successfully"), 400: dict(error="Bad request")}
+    )
+
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -31,6 +39,30 @@ class RegisterView(APIView):
 class LoginView(APIView):
     permission_classes = []
 
+    @extend_schema(
+        request=inline_serializer(
+            name='LoginRequest',
+            fields={
+                'username': serializers.CharField(),
+                'password': serializers.CharField(),
+            }
+        ),
+        responses={
+            200: inline_serializer(
+                name='TokenResponse',
+                fields={
+                    'refresh': serializers.CharField(),
+                    'access': serializers.CharField(),
+                }
+            ),
+            401: inline_serializer(
+                name='InvalidCredentialsResponse',
+                fields={
+                    'detail': serializers.CharField(),
+                }
+            ),
+        }
+    )
     def post(self, request, *args, **kwargs):
         user = authenticate(request, username=request.data['username'], password=request.data['password'])
 
@@ -60,6 +92,24 @@ class LoginView(APIView):
             return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 class LogoutView(APIView):
 
+    @extend_schema(
+        request=inline_serializer(
+            name='LogoutRequest',
+            fields={
+                'refresh': serializers.CharField(),
+            }
+        ),
+        responses={
+            205: None,
+            400: inline_serializer(
+                name='BadRequestResponse',
+                fields={
+                    'error': serializers.CharField(),
+                }
+            ),
+        }
+    )
+
     def post(self, request):
 
         try:
@@ -71,6 +121,35 @@ class LogoutView(APIView):
 
 class SendOtpView(APIView):
     permission_classes = []
+
+    @extend_schema(
+        request=inline_serializer(
+            name='SendOtpRequest',
+            fields={
+                'phone': serializers.CharField(),
+            }
+        ),
+        responses={
+            200: inline_serializer(
+                name='SendOtpResponse',
+                fields={
+                    'message': serializers.CharField(),
+                }
+            ),
+            400: inline_serializer(
+                name='BadRequestResponse',
+                fields={
+                    'error': serializers.CharField(),
+                }
+            ),
+            500: inline_serializer(
+                name='ServerErrorResponse',
+                fields={
+                    'error': serializers.CharField(),
+                }
+            )
+        }
+    )
 
     def post(self, request):
         phone = request.data.get('phone')
@@ -91,6 +170,32 @@ class SendOtpView(APIView):
 
 class ValidateOtpView(APIView):
 
+    @extend_schema(
+        request=inline_serializer(
+            name='ValidateOtpRequest',
+            fields={
+                'phone': serializers.CharField(),
+                'otp': serializers.CharField(),
+            }
+        ),
+        responses={
+            200: None,
+            400: inline_serializer(
+                name='InvalidOtpResponse',
+                fields={
+                    'error': serializers.CharField(),
+                }
+            ),
+            404: inline_serializer(
+                name='UserNotFoundResponse',
+                fields={
+                    'error': serializers.CharField(),
+                }
+            ),
+        }
+    )
+
+
     def post(self, request):
         phone = request.data.get('phone')
         otp = request.data.get('otp')
@@ -107,6 +212,36 @@ class ValidateOtpView(APIView):
 
 class ChangePasswordView(APIView):
 
+    @extend_schema(
+        request=inline_serializer(
+            name='ChangePasswordRequest',
+            fields={
+                'old_password': serializers.CharField(),
+                'new_password': serializers.CharField(),
+                'new_password_repeat': serializers.CharField(),
+            }
+        ),
+        responses={
+            200: inline_serializer(
+                name='ChangePasswordSuccessResponse',
+                fields={
+                    'message': serializers.CharField(),
+                }
+            ),
+            400: inline_serializer(
+                name='BadRequestResponse',
+                fields={
+                    'error': serializers.CharField(),
+                }
+            ),
+            401: inline_serializer(
+                name='UnauthorizedResponse',
+                fields={
+                    'error': serializers.CharField(),
+                }
+            )
+        }
+    )
 
     def post(self, request):
         user = request.user
@@ -129,6 +264,39 @@ class ChangePasswordView(APIView):
 
 class ForgotPasswordView(APIView):
     permission_classes = []
+
+    @extend_schema(
+        request=inline_serializer(
+            name='ForgotPasswordRequest',
+            fields={
+                'phone': serializers.CharField(),
+                'otp': serializers.CharField(),
+                'new_password': serializers.CharField(),
+                'new_password_repeat': serializers.CharField(),
+            }
+        ),
+        responses={
+            200: inline_serializer(
+                name='PasswordSetSuccessfullyResponse',
+                fields={
+                    'message': serializers.CharField(),
+                }
+            ),
+            400: inline_serializer(
+                name='InvalidOtpResponse',
+                fields={
+                    'error': serializers.CharField(),
+                }
+            ),
+            404: inline_serializer(
+                name='UserNotFoundResponse',
+                fields={
+                    'error': serializers.CharField(),
+                }
+            ),
+        }
+    )
+
     def post(self, request):
         phone = request.data.get('phone')
         otp = request.data.get('otp')
@@ -151,6 +319,19 @@ class ForgotPasswordView(APIView):
         return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
 
 class ListTokensView(APIView):
+
+    @extend_schema(
+        responses={
+            200: inline_serializer(
+                name='TokenListResponse',
+                fields={
+                    'token_id': serializers.IntegerField(),
+                    'user_agent': serializers.CharField(),
+                },
+                many=True
+            )
+        }
+    )
     def get(self, request):
         user = request.user
         tokens = OutstandingToken.objects.filter(user=user)
@@ -160,6 +341,19 @@ class ListTokensView(APIView):
 
 class KillTokensView(APIView):
 
+    @extend_schema(
+        request=inline_serializer(
+            name='KillTokensRequest',
+            fields={
+                'token_ids': serializers.ListField(
+                    child=serializers.IntegerField()
+                )
+            }
+        ),
+        responses={
+            200: None
+        }
+    )
 
     def post(self, request):
         token_ids = request.data.get('token_ids', [])
@@ -176,6 +370,25 @@ class KillTokensView(APIView):
 
 #logger = logging.getLogger(__name__)
 class TestAuthView(APIView):
+
+    @extend_schema(
+        responses={
+            200: inline_serializer(
+                name='AuthSuccessResponse',
+                fields={
+                    'user': serializers.CharField(),
+                    'is_authenticated': serializers.BooleanField(),
+                }
+            ),
+            401: inline_serializer(
+                name='AuthErrorResponse',
+                fields={
+                    'error': serializers.CharField(),
+                }
+            ),
+        }
+    )
+
     def get(self, request):
         # logger.debug(f"Request user: {request.user}")
         #logger.debug(f"Request headers: {request.headers}")
