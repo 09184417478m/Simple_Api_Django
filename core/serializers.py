@@ -14,3 +14,32 @@ class RegisterSerializer(serializers.ModelSerializer):
             phone=validated_data['phone']
         )
         return user
+    
+
+
+
+    
+
+"""
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+
+
+
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+
+
+
+class SendOtpSerializer(serializers.Serializer):
+    phone = serializers.CharField()
+
+
+.
+.
+.
+"""
