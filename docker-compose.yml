@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: simpleAPI_database
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 09902048023M.sh
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:6
+    ports:
+      - "6379:6379"
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE: postgres
+      SQL_HOST: db
+      SQL_PORT: 5432
+      SQL_DATABASE: simpleAPI_database
+      SQL_USER: postgres
+      SQL_PASSWORD: 09902048023M.sh
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+volumes:
+  postgres_data:

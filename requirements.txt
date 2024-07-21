@@ -6,13 +6,16 @@ charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6
 dj-rest-auth==6.0.0
-Django==5.0.7
+psycopg2-binary==2.9.9
+Django
+drf_spectacular>=0.20.1
 django-allauth==0.63.6
 django-cors-headers==4.4.0
 django-environ==0.11.2
 django-prometheus==2.3.1
 django-redis==5.4.0
 django-rest-auth==0.9.5
+drf_spectacular_sidecar
 djangorestframework==3.15.2
 djangorestframework-simplejwt==5.3.1
 Flask==3.0.3

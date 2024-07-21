@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 
-
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -164,28 +164,23 @@ WSGI_APPLICATION = 'simple_api.wsgi.application'
 
 
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'simpleAPI_database',
-        'USER': 'postgres',
-        'PASSWORD': '09902048023M.sh',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv('SQL_DATABASE', 'simpleAPI_database'),
+        'USER': os.getenv('SQL_USER', 'postgres'),
+        'PASSWORD': os.getenv('SQL_PASSWORD', '09902048023M.sh'),
+        'HOST': os.getenv('SQL_HOST', 'localhost'),
+        'PORT': os.getenv('SQL_PORT', '5432'),
     }
 }
 
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
-        'OPTIONS': {
-            # No KEY_PREFIX here
-        },
+        'LOCATION': f'redis://{os.getenv("REDIS_HOST", "localhost")}:{os.getenv("REDIS_PORT", "6379")}/1',
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
