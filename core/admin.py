@@ -1,6 +1,6 @@
 from rest_framework.authtoken.models import Token
 from django.contrib import admin
-from .models import CustomUser , TokenMetadata
+from core.models import CustomUser , TokenMetadata
 
 
 admin.site.register(CustomUser)

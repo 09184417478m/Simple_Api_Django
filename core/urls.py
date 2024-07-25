@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import RegisterView, LoginView, LogoutView, SendOtpView, ValidateOtpView, ChangePasswordView, \
-ForgotPasswordView, ListTokensView, KillTokensView, TestAuthView
+from core.views import RegisterView, LoginView, LogoutView, SendOtpView, ValidateOtpView, ChangePasswordView, \
+ForgotPasswordView, ListTokensView, KillTokensView
 
 
 
@@ -14,5 +14,4 @@ urlpatterns = [
     path('forgot-pass/', ForgotPasswordView.as_view(), name='forgot_pass'),
     path('list-tokens/', ListTokensView.as_view(), name='list_tokens'),
     path('kill-tokens/', KillTokensView.as_view(), name='kill_tokens'),
-    path('test-auth/', TestAuthView.as_view(), name='test_auth'),
 ]

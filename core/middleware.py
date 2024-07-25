@@ -2,7 +2,7 @@ from django.utils.deprecation import MiddlewareMixin
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework_simplejwt.exceptions import InvalidToken , TokenError
-from .models import TokenMetadata
+from core.models import TokenMetadata
 
 class UserAgentMiddleware(MiddlewareMixin):
     def process_request(self, request):

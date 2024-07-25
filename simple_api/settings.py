@@ -170,7 +170,7 @@ DATABASES = {
         'NAME': os.getenv('SQL_DATABASE', 'simpleAPI_database'),
         'USER': os.getenv('SQL_USER', 'postgres'),
         'PASSWORD': os.getenv('SQL_PASSWORD', '09902048023M.sh'),
-        'HOST': os.getenv('SQL_HOST', 'localhost'),
+        'HOST': os.getenv('SQL_HOST', 'db'),
         'PORT': os.getenv('SQL_PORT', '5432'),
     }
 }
@@ -178,7 +178,7 @@ DATABASES = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': f'redis://{os.getenv("REDIS_HOST", "localhost")}:{os.getenv("REDIS_PORT", "6379")}/1',
+        'LOCATION': f'redis://{os.getenv("REDIS_HOST", "redis")}:{os.getenv("REDIS_PORT", "6379")}/1',
     }
 }
 
